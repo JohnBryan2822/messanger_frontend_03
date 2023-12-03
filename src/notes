@@ -1,0 +1,3 @@
+now when user click submit, redirect to new page to verify the email
+here can we send 6-digit code to user's email, then put timer here also (30 seconds)
+if user didn't get the code he can click resend button and code should send again

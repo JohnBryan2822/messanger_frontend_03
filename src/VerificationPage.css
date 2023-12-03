@@ -1,0 +1,36 @@
+/* VerificationCodePage.css */
+.verification-page {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.verification-input {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 10px;
+    width: 200px;
+    font-size: 16px;
+}
+
+.verify-button,
+.resend-button {
+    display: block; /* Makes the button a block-level element */
+    width: 200px; /* Adjust width as needed */
+    margin: 10px auto; /* Centers the button and adds margin */
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.verify-button:hover,
+.resend-button:hover {
+    background-color: #0056b3;
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

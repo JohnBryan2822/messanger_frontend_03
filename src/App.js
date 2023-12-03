@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import WelcomeScreen from './WelcomeScreen';
+import SignUp from './SignUp';
+import VerificationCodePage from './VerificationCodePage'; // Import this new component
+import CreatePasswordPage from './CreatePasswordPage'; // Import this new component
+import SignIn from './SignIn';
+import HomePage from './HomePage';
+import HomePage2 from './HomePage2';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-function App() {
+const App = () => {
+  const [setIsSignUpCompleted] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+
+  // Function to call when user successfully completes the sign-up
+  const handleSignUpComplete = () => {
+      setIsSignUpCompleted(true);
+  };
+
+  const handleVerificationSuccess = () => {
+    setIsVerified(true);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/signup" element={<SignUp onSignUpComplete={handleSignUpComplete} />} />
+        <Route path="/create-password" element={<CreatePasswordPage />} />
+        <Route path="/" element={<WelcomeScreen />} />
+        <Route path="/verify-code" element={<VerificationCodePage onVerificationSuccess={handleVerificationSuccess} />} />
+        <Route path="/create-password" element={isVerified ? <CreatePasswordPage /> : <Navigate to="/signup" />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/homepage2" element={<HomePage />} />
+        <Route path="/homepage" element={<HomePage2 />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
