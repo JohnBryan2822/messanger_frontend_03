@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaBars, FaEllipsisV, FaPaperPlane, FaRegSmile } from 'react-icons/fa';
 import './HomePage.css';
+import SockJS from 'sockjs-client';
+import * as Webstomp from 'webstomp-client';
 
 const HomePage2 = () => {
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [socket, setSocket] = useState(null);
+    const [client, setClient] = useState(null);
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    useEffect(() => {
+        // Connect to the WebSocket server
+        const newSocket = new SockJS('http://localhost:5000/ws');
+        const client = Webstomp.over(socket);
+
+        // Cleanup function on component unmount
+        return () => {
+            if (newSocket) {
+                newSocket.disconnect();
+            }
+        };
+    }, []);
 
     // Load chats when the component mounts
     useEffect(() => {
@@ -16,16 +34,13 @@ const HomePage2 = () => {
     // Function to fetch chats from the backend
     const fetchChats = async () => {
         try {
-            const userString = localStorage.getItem('user');
             const token = localStorage.getItem('jwtToken');
-
-            if (!userString || !token) {
+            if (!user || !token) {
                 console.error('User or token not found in localStorage');
                 return;
             }
 
             // Parse the user string to get the user object
-            const user = JSON.parse(userString);
             const userId = user.id; // Adjust if the property name for the ID in your user object is different
 
             const response = await fetch(`http://localhost:5000/messenger/chats/${userId}`, {
@@ -50,25 +65,21 @@ const HomePage2 = () => {
     const handleSelectChat = (chat) => {
         // Set the selected chat
         setSelectedChat(chat);
-
         // Fetch and display messages for the selected chat
-        fetchAndDisplayUserChat(chat.userId);
+        fetchAndDisplayUserChat(chat.id);
     };
 
     const fetchAndDisplayUserChat = async (recipientId) => {
         // Fetch messages for the selected chat from the backend
         try {
-            const userString = localStorage.getItem('user');
             const token = localStorage.getItem('jwtToken');
 
-            if (!userString || !token) {
+            if (!user || !token) {
                 console.error('User or token not found in localStorage');
                 return;
             }
 
-            const user = JSON.parse(userString);
             const senderId = user.id;
-
             const response = await fetch(`http://localhost:5000/messenger/messages/${senderId}/${recipientId}`, {
                 headers: {
                     'Authorization': token
@@ -89,16 +100,16 @@ const HomePage2 = () => {
     // Function to send a new message
     const handleSendMessage = async () => {
         // Send a new message to the server
-        if (newMessage.trim() && socket) {
-            const user = JSON.parse(localStorage.getItem('user'));
+        if (newMessage.trim()) {
             const chatMessage = {
                 senderId: user.id,  // Replace with the actual user ID
-                recipientId: selectedChat.userId,
+                recipientId: selectedChat.id,
                 content: newMessage.trim(),
                 timestamp: new Date()
             };
 
-            socket.emit('chat', chatMessage);  // Emit the message to the server
+            // socket.emit('chat', chatMessage);  // Emit the message to the server
+            client.send("/app/chat", {}, JSON.stringify(chatMessage));
 
             // Update the messages state with the new message
             setMessages((prevMessages) => [...prevMessages, chatMessage]);
@@ -119,12 +130,13 @@ const HomePage2 = () => {
                     </div>
                     <div className="chat-list">
                         {chats.map(chat => (
-                            <div className='chat-list-item' key={chat.id} onClick={() => handleSelectChat(chat)}>
+                            <div className={`chat-list-item ${selectedChat && chat.id === selectedChat.id ? 'selected' : ''}`} 
+                                        key={chat.id} onClick={() => handleSelectChat(chat)}>
                                 <div className="initial-letter">
                                     {chat.username.charAt(0).toUpperCase()}
                                 </div>
                                 {chat.username}
-                                {notifications.map(notification => {
+                                {/* {notifications.map(notification => {
                                     if (notification.senderId === chat.userId && notification.unreadMessageCount > 0) {
                                         // Show a small rounded notification with unreadMessageCount
                                         return (
@@ -134,7 +146,7 @@ const HomePage2 = () => {
                                         );
                                     }
                                     return null;
-                                })}
+                                })} */}
                             </div>
                         ))}
                     </div>
@@ -150,7 +162,7 @@ const HomePage2 = () => {
                     <div className="chat-conversation">
                         {messages.map((message, index) => (
                             <div key={index} className={`message ${message.senderId === user.id ? 'mine' : ''}`}>
-                                {message.content}
+                                {message.messageText}
                             </div>
                         ))}
                     </div>

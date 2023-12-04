@@ -65,6 +65,19 @@ body {
     color: #333;
 }
 
+.chat-list-section {
+    display: flex; /* Use flexbox to structure the chat list layout */
+    flex-direction: column; /* Stack children vertically */
+    height: 100%; /* Full height of the parent container */
+    padding: 0; /* Adjust padding as needed */
+}
+
+.chat-list-item.selected {
+    background-color: #e9eff4; /* Light blue background for the selected item */
+    color: #007bff; /* Change text color */
+    font-weight: bold; /* Make text bold */
+}
+
 .chat-list {
     padding: 10px;
     overflow-y: auto;
@@ -113,16 +126,18 @@ body {
 }
 
 .message {
-    margin-bottom: 10px;
     padding: 10px;
+    margin: 10px;
     border-radius: 10px;
-    background-color: #f8f9fa;
-    border: 1px solid #eaeaea;
+    margin-left: auto; /* Align non-user messages to the left */
+    background-color: #f2f3f5;
+    border: 1px solid #cabebe;
+    text-align: left;
 }
 
 .message.mine {
     background-color: #d1e7fd;
-    border-color: #b6d4fe;
+    border-color: #066cfa;
     text-align: right;
 }
 
