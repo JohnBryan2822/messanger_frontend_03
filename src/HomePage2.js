@@ -13,18 +13,19 @@ const HomePage2 = () => {
     const [client, setClient] = useState(null);
     const user = JSON.parse(localStorage.getItem('user'));
 
-    useEffect(() => {
-        // Connect to the WebSocket server
-        const newSocket = new SockJS('http://localhost:5000/ws');
-        const client = Webstomp.over(socket);
+    // useEffect(() => {
+    //     // Connect to the WebSocket server
+    //     const newSocket = new SockJS('http://localhost:5000/ws');
+    //     console.log(newSocket);
+    //     const client = Webstomp.over(socket);
 
-        // Cleanup function on component unmount
-        return () => {
-            if (newSocket) {
-                newSocket.disconnect();
-            }
-        };
-    }, []);
+    //     // Cleanup function on component unmount
+    //     return () => {
+    //         if (newSocket) {
+    //             newSocket.disconnect();
+    //         }
+    //     };
+    // }, []);
 
     // Load chats when the component mounts
     useEffect(() => {

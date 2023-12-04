@@ -10,8 +10,9 @@ import HomePage2 from './HomePage2';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const App = () => {
-  const [setIsSignUpCompleted] = useState(false);
+  const [isSignUpCompleted, setIsSignUpCompleted] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [isPasswordReady, setPasswordReady] = useState(true);
 
   // Function to call when user successfully completes the sign-up
   const handleSignUpComplete = () => {
@@ -22,17 +23,20 @@ const App = () => {
     setIsVerified(true);
   };
 
+  const handlePasswordReady = () => {
+    setPasswordReady(true);
+  }
+
   return (
     <Router>
       <Routes>
         <Route path="/signup" element={<SignUp onSignUpComplete={handleSignUpComplete} />} />
-        <Route path="/create-password" element={<CreatePasswordPage />} />
         <Route path="/" element={<WelcomeScreen />} />
-        <Route path="/verify-code" element={<VerificationCodePage onVerificationSuccess={handleVerificationSuccess} />} />
-        <Route path="/create-password" element={isVerified ? <CreatePasswordPage /> : <Navigate to="/signup" />} />
+        <Route path="/verify-code" element={isSignUpCompleted ?  <VerificationCodePage onVerificationSuccess={handleVerificationSuccess} /> : <Navigate to="/signup" />} />
+        <Route path="/create-password" element={isVerified ? <CreatePasswordPage onPasswordComplete={handlePasswordReady} /> : <Navigate to="/signup" />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/homepage2" element={<HomePage />} />
-        <Route path="/homepage" element={<HomePage2 />} />
+        <Route path="/homepage" element={isPasswordReady ? <HomePage2 /> : <Navigate to="/signup" />} />
       </Routes>
     </Router>
   );

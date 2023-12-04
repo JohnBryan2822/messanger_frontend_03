@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import if you need to navigate after submission
 import './CreatePassword.css';
 
-const CreatePasswordPage = () => {
+const CreatePasswordPage = ({onPasswordComplete}) => {
     const location = useLocation(); // Use the useLocation hook
     const { username } = location.state || {};
     const [password, setPassword] = useState('');
@@ -25,11 +25,14 @@ const CreatePasswordPage = () => {
             });
 
             if (response.ok) {
+                // Set Password Complete 'true'
+                onPasswordComplete();
+                
                 const user = await response.json(); // Assuming the response is the user object
                 
                 // Save the user object to localStorage
                 localStorage.setItem('user', JSON.stringify(user));
-
+                
                 // Handle successful password set, e.g., navigate to a login page or a success page
                 navigate('/homepage'); // Update this to your desired route
             } else {

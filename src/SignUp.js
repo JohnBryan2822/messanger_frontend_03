@@ -57,7 +57,7 @@ const SignUp = ({ onSignUpComplete }) => {
                 });
 
                 if (response.ok) {
-                    // onSignUpComplete();
+                    onSignUpComplete();
                     const data = await response.json();
                     localStorage.setItem('jwtToken', data.token);
                     navigate('/verify-code', { state: { username: formData.username, email: formData.email } });
