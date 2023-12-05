@@ -13,6 +13,7 @@ const App = () => {
   const [isSignUpCompleted, setIsSignUpCompleted] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [isPasswordReady, setPasswordReady] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   // Function to call when user successfully completes the sign-up
   const handleSignUpComplete = () => {
@@ -34,9 +35,9 @@ const App = () => {
         <Route path="/" element={<WelcomeScreen />} />
         <Route path="/verify-code" element={isSignUpCompleted ?  <VerificationCodePage onVerificationSuccess={handleVerificationSuccess} /> : <Navigate to="/signup" />} />
         <Route path="/create-password" element={isVerified ? <CreatePasswordPage onPasswordComplete={handlePasswordReady} /> : <Navigate to="/signup" />} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signin" element={<SignIn setUserId={setUserId}/>} />
         <Route path="/homepage2" element={<HomePage />} />
-        <Route path="/homepage" element={isPasswordReady ? <HomePage2 /> : <Navigate to="/signup" />} />
+        <Route path="/homepage" element={isPasswordReady ? <HomePage2 userId={userId}/> : <Navigate to="/signup" />} />
       </Routes>
     </Router>
   );

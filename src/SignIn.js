@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './SignIn.css';
 
-const SignIn = () => {
+const SignIn = ({setUserId}) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -22,15 +22,14 @@ const SignIn = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ username, password }),
+                    credentials: 'include'
                 });
                 
                 if (response.ok) {
-                    const token = response.headers.get('Authorization');
                     const user = await response.json(); // Assuming the response is the user object
-                    localStorage.setItem('jwtToken', token);
-                    localStorage.setItem('user', JSON.stringify(user));
-                    
+                    console.log(user)
+                    setUserId(user.id);
                     navigate('/homepage'); // Redirect to home or dashboard page
                 } else {
                     // Handle errors, e.g., invalid credentials

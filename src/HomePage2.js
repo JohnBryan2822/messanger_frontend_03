@@ -1,57 +1,68 @@
+/* global SockJS, Stomp */
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaBars, FaEllipsisV, FaPaperPlane, FaRegSmile } from 'react-icons/fa';
 import './HomePage.css';
-import SockJS from 'sockjs-client';
-import * as Webstomp from 'webstomp-client';
 
-const HomePage2 = () => {
+const HomePage2 = ({userId}) => {
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-    const [socket, setSocket] = useState(null);
-    const [client, setClient] = useState(null);
-    const user = JSON.parse(localStorage.getItem('user'));
+    // const [socket, setSocket] = useState(null);
+    const [stompClient, setStompClient] = useState(null);
 
-    // useEffect(() => {
-    //     // Connect to the WebSocket server
-    //     const newSocket = new SockJS('http://localhost:5000/ws');
-    //     console.log(newSocket);
-    //     const client = Webstomp.over(socket);
+    useEffect(() => {
+        let client = null;
 
-    //     // Cleanup function on component unmount
-    //     return () => {
-    //         if (newSocket) {
-    //             newSocket.disconnect();
-    //         }
-    //     };
-    // }, []);
+        const connectStomp = async () => {
+            const socket = new SockJS('http://localhost:5000/ws');
+            client = Stomp.over(socket);
+    
+            client.connect({}, frame => {
+                // Your subscription or messaging logic
+                client.subscribe(`/chat/${userId}/queue/messages`, onMessageReceived);
+            });
+        };
+    
+        connectStomp();
+
+        // Set the stompClient in the state
+        setStompClient(client);
+
+
+        // Cleanup function on component unmount
+        return () => {
+            if (client && client.connected) {
+                client.disconnect(() => {
+                    console.log('Disconnected');
+                });
+            }
+        };
+    }, []);
 
     // Load chats when the component mounts
     useEffect(() => {
         fetchChats();
     }, []);
 
+    const onMessageReceived = async (payload) => {
+        // await fetchChats();
+
+        const message = JSON.parse(payload.body);
+        // Update the messages state with the new message
+        setMessages((prevMessages) => [...prevMessages, message]);
+    }
+
     // Function to fetch chats from the backend
     const fetchChats = async () => {
         try {
-            const token = localStorage.getItem('jwtToken');
-            if (!user || !token) {
-                console.error('User or token not found in localStorage');
-                return;
-            }
-
-            // Parse the user string to get the user object
-            const userId = user.id; // Adjust if the property name for the ID in your user object is different
-
-            const response = await fetch(`http://localhost:5000/messenger/chats/${userId}`, {
-                headers: {
-                    'Authorization': token
-                }
+            const response = await fetch(`http://localhost:5000/messenger/chats`, {
+                credentials: 'include'
             });
 
             if (response.ok) {
                 const fetchedChats = await response.json();
+                console.log(fetchedChats);
                 setChats(fetchedChats);
                 //initializeNotifications(fetchedChats);
             } else {
@@ -73,18 +84,8 @@ const HomePage2 = () => {
     const fetchAndDisplayUserChat = async (recipientId) => {
         // Fetch messages for the selected chat from the backend
         try {
-            const token = localStorage.getItem('jwtToken');
-
-            if (!user || !token) {
-                console.error('User or token not found in localStorage');
-                return;
-            }
-
-            const senderId = user.id;
-            const response = await fetch(`http://localhost:5000/messenger/messages/${senderId}/${recipientId}`, {
-                headers: {
-                    'Authorization': token
-                }
+            const response = await fetch(`http://localhost:5000/messenger/messages/${recipientId}`, {
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -103,14 +104,13 @@ const HomePage2 = () => {
         // Send a new message to the server
         if (newMessage.trim()) {
             const chatMessage = {
-                senderId: user.id,  // Replace with the actual user ID
                 recipientId: selectedChat.id,
-                content: newMessage.trim(),
+                messageText: newMessage.trim(),
                 timestamp: new Date()
             };
 
             // socket.emit('chat', chatMessage);  // Emit the message to the server
-            client.send("/app/chat", {}, JSON.stringify(chatMessage));
+            stompClient.send("/app/chat", {}, chatMessage);
 
             // Update the messages state with the new message
             setMessages((prevMessages) => [...prevMessages, chatMessage]);
@@ -162,7 +162,11 @@ const HomePage2 = () => {
                     </div>
                     <div className="chat-conversation">
                         {messages.map((message, index) => (
-                            <div key={index} className={`message ${message.senderId === user.id ? 'mine' : ''}`}>
+                            <div key={index} className={`message ${message.recipientId === selectedChat.id ? 'mine' : ''}`}>
+                                {/* Message recipient id - {message.recipientId},
+                                selected chat id - {selectedChat.id},
+                                Message - {JSON.stringify(message)},
+                                Selected Chat - {JSON.stringify(selectedChat)} */}
                                 {message.messageText}
                             </div>
                         ))}
