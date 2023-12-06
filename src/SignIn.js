@@ -28,7 +28,6 @@ const SignIn = ({setUserId}) => {
                 
                 if (response.ok) {
                     const user = await response.json(); // Assuming the response is the user object
-                    console.log(user)
                     setUserId(user.id);
                     navigate('/homepage'); // Redirect to home or dashboard page
                 } else {

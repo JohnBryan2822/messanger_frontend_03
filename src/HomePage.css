@@ -30,12 +30,20 @@ body {
     align-items: center;
     padding: 10px;
     background-color: #f8f9fa;
-    border-bottom: 1px solid #eaeaea;
+    border-bottom: 1px solid rgb(189, 189, 189);
 }
 
 .chat-list-header input, .message-input-area input {
     margin-left: 10px;
     flex-grow: 1;
+}
+
+.chat-window-section {
+    border: 1px solid rgb(189, 189, 189);
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .chat-conversation {
@@ -59,17 +67,19 @@ body {
 }
 
 .username-title {
+    margin-left: 30px;
     flex-grow: 1;
-    text-align: center;
+    text-align: left;
     font-weight: bold;
     color: #333;
 }
 
 .chat-list-section {
+    position: relative;
     display: flex; /* Use flexbox to structure the chat list layout */
     flex-direction: column; /* Stack children vertically */
     height: 100%; /* Full height of the parent container */
-    padding: 0; /* Adjust padding as needed */
+    padding: 0 !important; /* Adjust padding as needed */
 }
 
 .chat-list-item.selected {
@@ -79,7 +89,7 @@ body {
 }
 
 .chat-list {
-    padding: 10px;
+    padding-left: 10px;
     overflow-y: auto;
     height: calc(100% - 60px);
     background-color: #fff;
@@ -90,9 +100,7 @@ body {
 .chat-list-item {
     display: flex;
     align-items: center;
-
     padding: 15px 20px; /* Increased padding for a bigger look */
-    border-bottom: 1px solid #eaeaea;
     cursor: pointer;
     box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.1); /* Subtle box shadow for each item */
     background-color: #ffffff; /* White background for each item */
@@ -154,6 +162,33 @@ body {
 
 .input-group {
     margin-top: 10px;
+}
+
+.search-results {
+    list-style-type: none;
+    margin-left: 20px;
+    padding: 0;
+    position: absolute;
+    width: calc(100% - 20px); /* Adjust width to account for padding */
+    top: 100%; /* Position it right below the search bar */
+    left: 10px; /* Align it with the left edge of the search bar */
+    background-color: white;
+    border: 1px solid #ddd;
+    z-index: 2; /* Ensure it's above other content */
+    min-height: 50px; /* Minimum height of the dropdown */
+    max-height: 500px; /* Maximum height of the dropdown */
+    overflow-y: auto; /* Enable scroll if content exceeds max-height */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Slight shadow for depth */
+}
+
+.search-results li {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.search-results li:hover {
+    background-color: #f5f5f5;
 }
 
 /* Responsive adjustments */
