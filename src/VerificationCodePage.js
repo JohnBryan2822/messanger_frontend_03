@@ -26,7 +26,7 @@ const VerificationCodePage = ({ onVerificationSuccess }) => {
 
     const onConfirm = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/messenger/authentication/register/email/${email}/verify`, {
+            const response = await fetch(`http://localhost:5000/messenger/authentication/register/verify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

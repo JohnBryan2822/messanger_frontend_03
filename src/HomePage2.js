@@ -104,13 +104,13 @@ const HomePage2 = ({userId}) => {
         // Send a new message to the server
         if (newMessage.trim()) {
             const chatMessage = {
+                senderId: userId,
                 recipientId: selectedChat.id,
-                messageText: newMessage.trim(),
-                timestamp: new Date()
+                messageText: newMessage.trim()
             };
-
+//          credentials: 'include'
             // socket.emit('chat', chatMessage);  // Emit the message to the server
-            stompClient.send("/app/chat", {}, chatMessage);
+            stompClient.send("/app/chat", {'Content-Type': 'application/json'}, JSON.stringify(chatMessage));
 
             // Update the messages state with the new message
             setMessages((prevMessages) => [...prevMessages, chatMessage]);
