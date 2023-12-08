@@ -1,15 +1,17 @@
 /* global SockJS, Stomp */
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaBars, FaEllipsisV, FaPaperPlane, FaRegSmile } from 'react-icons/fa';
+import { FaSearch, FaBars, FaEllipsisV, FaPaperPlane, FaRegSmile, FaArrowLeft } from 'react-icons/fa';
 import './HomePage.css';
 
-const HomePage2 = ({userId}) => {
+const HomePage2 = ({user}) => {
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const sidebarRef = useRef(null);
     const chatContainerRef = useRef(null);
     const searchRef = useRef(null);
     
@@ -23,7 +25,7 @@ const HomePage2 = ({userId}) => {
     
             client.connect({}, frame => {
                 // Your subscription or messaging logic
-                client.subscribe(`/user/${userId}/queue/messages`, onMessageReceived);
+                client.subscribe(`/user/${user.id}/queue/messages`, onMessageReceived);
             });
         };
     
@@ -122,7 +124,7 @@ const HomePage2 = ({userId}) => {
         // Send a new message to the server
         if (newMessage.trim()) {
             const chatMessage = {
-                senderId: userId,
+                senderId: user.id,
                 recipientId: selectedChat.id,
                 messageText: newMessage.trim()
             };
@@ -170,13 +172,53 @@ const HomePage2 = ({userId}) => {
         }
     }
 
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    // Close sidebar if clicked outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setIsSidebarOpen(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [sidebarRef]);
+
     return (
         <div className="container-fluid homepage">
             <div className="row h-100">
+                {/* Sidebar */}
+                <div ref={sidebarRef} className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+                    <div className="sidebar-content">
+                        <div className='sidebar-header'>
+                            <FaArrowLeft className="back-arrow" onClick={toggleSidebar} /> {/* This is the back arrow */}
+                            <span className="sidebar-title">Settings</span>
+                        </div>
+                        <div className="profile-picture-container">
+                            {user.picture ?
+                                <img src={user.picture} alt="Profile" className="profile-picture" /> :
+                                <div className="profile-initial">{user.username.charAt(0).toUpperCase()}</div>
+                            }
+                        </div>
+                        <div className="sidebar-username">{user.username}</div> {/* Replace with dynamic username if needed */}
+                        <ul className="sidebar-menu">
+                            <li>My Account</li>
+                            <li>Notifications</li>
+                            <li>Chat Settings</li>
+                            <li>Saved Messages</li>
+                        </ul>
+                        <button className="sidebar-logout">Logout</button>
+                    </div>
+                </div>
+                
                 {/* Chat List Section */}
                 <div ref={searchRef} className="col-md-4 col-lg-3 chat-list-section">
                     <form onSubmit={handleFormSubmit} className="chat-list-header">
-                        <button className="btn btn-light me-2"><FaBars /></button>
+                        <button className="btn btn-light me-2" onClick={toggleSidebar}><FaBars /></button>
                         <input type="text" className="form-control" placeholder="Search" value={searchTerm} onChange={handleInputChange} />
                     </form>
                     <div className="chat-list">

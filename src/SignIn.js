@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './SignIn.css';
 
-const SignIn = ({setUserId}) => {
+const SignIn = ({setUser}) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
@@ -28,7 +28,7 @@ const SignIn = ({setUserId}) => {
                 
                 if (response.ok) {
                     const user = await response.json(); // Assuming the response is the user object
-                    setUserId(user.id);
+                    setUser(user);
                     navigate('/homepage'); // Redirect to home or dashboard page
                 } else {
                     // Handle errors, e.g., invalid credentials

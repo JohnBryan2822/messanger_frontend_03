@@ -191,6 +191,114 @@ body {
     background-color: #f5f5f5;
 }
 
+.sidebar {
+    position: fixed;
+    left: -500px;
+    top: 0;
+    width: 25% !important;
+    height: 100%; 
+    background: #f8f9fa; 
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    transition: left 0.3s;
+    z-index: 3;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #ddd;
+    background-color: #f8f9fa;
+}
+
+.back-arrow {
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 25px;
+}
+
+.sidebar-title {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    margin-left: 130px;
+}
+
+.sidebar.open {
+    left: 0;
+}
+
+.sidebar-content {
+    padding: 20px;
+}
+
+.sidebar-username {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.sidebar-menu li {
+    padding: 10px 0;
+    cursor: pointer;
+}
+
+.sidebar-menu li:hover {
+    background-color: #e9eff4;
+}
+
+.sidebar-logout {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    padding: 10px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.sidebar-logout:hover {
+    background-color: #ff7875;
+}
+
+.profile-picture-container {
+    margin-left: 20px;
+    display: flex;
+    justify-content: left;
+    margin: 20px 0;
+}
+
+.profile-picture {
+    margin-left: 20px;
+    width: 150px; /* Adjust size as needed */
+    height: 150px; /* Adjust size as needed */
+    border-radius: 50%; /* Make it round */
+    object-fit: cover; /* Ensures the image covers the area */
+}
+
+.profile-initial {
+    margin-left: 20px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .chat-list-section, .chat-window-section {
