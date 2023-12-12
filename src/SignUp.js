@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './SignUp.css';
 import { useNavigate } from 'react-router-dom';
 
-const SignUp = ({ onSignUpComplete }) => {
+const SignUp = ({ setIsSignUpCompleted }) => {
     const [formData, setFormData] = useState({ username: '', email: '' });
     const [errors, setErrors] = useState({});
     const [registrationError, setRegistrationError] = useState('');
@@ -52,15 +52,12 @@ const SignUp = ({ onSignUpComplete }) => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData)
                 });
 
                 if (response.ok) {
-                    onSignUpComplete();
-                    const data = await response.json();
-                    localStorage.setItem('jwtToken', data.token);
+                    setIsSignUpCompleted(true);
                     navigate('/verify-code', { state: { username: formData.username, email: formData.email } });
                 } else {
                     const errorData = await response.json();

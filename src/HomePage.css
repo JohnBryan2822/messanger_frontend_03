@@ -298,6 +298,37 @@ body {
     font-weight: bold;
 }
 
+.folder-buttons {
+    display: flex; /* Align buttons in a row */
+    padding: 5px; /* Padding around the button container */
+    justify-content: center;
+}
+
+.folder-button {
+    padding: 5px 50px; /* Padding inside each button */
+    border: 1px solid #ddd; /* Border for buttons */
+    background-color: white; /* Background color */
+    color: #333; /* Text color */
+    cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
+    margin: 0 10px; /* Space between buttons */
+    border-radius: 25px; /* Slightly rounded corners */
+    outline: none; /* Remove default focus outline */
+    transition: background-color 0.2s, color 0.2s; /* Smooth transition for hover effect */
+}
+
+.folder-button:last-child {
+    margin-right: 0; /* No margin for the last button */
+}
+
+.folder-button:hover {
+    background-color: #f0f0f0; /* Slight change on hover */
+}
+
+.folder-button.selected {
+    background-color: #007bff; /* Selected button background */
+    color: white; /* Selected button text color */
+    border-color: #007bff; /* Selected button border color */
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

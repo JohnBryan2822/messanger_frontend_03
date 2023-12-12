@@ -5,12 +5,14 @@ import './HomePage.css';
 
 const HomePage2 = ({user}) => {
     const [chats, setChats] = useState([]);
+    const [groups, setGroups] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const [stompClient, setStompClient] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [selectedList, setSelectedList] = useState('users');
     const sidebarRef = useRef(null);
     const chatContainerRef = useRef(null);
     const searchRef = useRef(null);
@@ -26,6 +28,7 @@ const HomePage2 = ({user}) => {
             client.connect({}, frame => {
                 // Your subscription or messaging logic
                 client.subscribe(`/user/${user.id}/queue/messages`, onMessageReceived);
+                groups.forEach(group => (client.subscribe(`/user/${group.id}/group/messages`, onGroupMessageHandle)));
             });
         };
     
@@ -48,6 +51,7 @@ const HomePage2 = ({user}) => {
     // Load chats when the component mounts
     useEffect(() => {
         fetchChats();
+        fetchGroups();
     }, []);
 
     useEffect(() => {
@@ -61,8 +65,6 @@ const HomePage2 = ({user}) => {
     };
 
     const onMessageReceived = async (payload) => {
-        console.log('Message Received')
-        // await fetchChats();
         const message = JSON.parse(payload.body);
         console.log(message.messageText);
         if (selectedChat && message.senderId === selectedChat.id) {
@@ -71,6 +73,14 @@ const HomePage2 = ({user}) => {
         } else {
             // Optionally handle messages for chats that are not currently selected
             // e.g., updating a notification counter or showing a toast notification
+        }
+    }
+
+    const onGroupMessageHandle = (payload) => {
+        const message = JSON.parse(payload.body);
+        console.log(message.messageText);
+        if(selectedChat && message.recipientId === selectedChat.id){
+            setMessages(prevMessages => [...prevMessages, message]);
         }
     }
 
@@ -93,12 +103,33 @@ const HomePage2 = ({user}) => {
             console.error('Error fetching chats:', error);
         }
     };
+    
+    // Function to fetch groups from the backend
+    const fetchGroups = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/messenger/group/available-groups`, {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const fetchedGroups = await response.json();
+                setGroups(fetchedGroups);
+                //initializeNotifications(fetchedChats);
+            } else {
+                // Handle HTTP errors
+                console.error('Failed to fetch chats:', response.status);
+            }
+        } catch (error) {
+            console.error('Error fetching chats:', error);
+        }
+    };
     // Function to handle selecting a chat
     const handleSelectChat = (chat) => {
         // Set the selected chat
         setSelectedChat(chat);
+
         // Fetch and display messages for the selected chat
-        fetchAndDisplayUserChat(chat.id);
+        selectedList === 'users' ? fetchAndDisplayUserChat(chat.id) : setMessages(chat.messages);
     };
 
     const fetchAndDisplayUserChat = async (recipientId) => {
@@ -128,9 +159,11 @@ const HomePage2 = ({user}) => {
                 recipientId: selectedChat.id,
                 messageText: newMessage.trim()
             };
-//          credentials: 'include'
-            // socket.emit('chat', chatMessage);  // Emit the message to the server
-            stompClient.send("/app/chat", {'Content-Type': 'application/json'}, JSON.stringify(chatMessage));
+
+            {selectedList === 'users' ?
+                stompClient.send("/app/chat", {'Content-Type': 'application/json'}, JSON.stringify(chatMessage)) :
+                stompClient.send("/app/group", {'Content-Type': 'application/json'}, JSON.stringify(chatMessage))
+            }
 
             // Update the messages state with the new message
             setMessages((prevMessages) => [...prevMessages, chatMessage]);
@@ -188,6 +221,15 @@ const HomePage2 = ({user}) => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [sidebarRef]);
 
+    const handleUsersClick = () => {
+        setSelectedList('users');
+    };
+    
+    const handleGroupsClick = () => {
+        setSelectedList('groups');
+    };
+    
+
     return (
         <div className="container-fluid homepage">
             <div className="row h-100">
@@ -199,7 +241,7 @@ const HomePage2 = ({user}) => {
                             <span className="sidebar-title">Settings</span>
                         </div>
                         <div className="profile-picture-container">
-                            {user.picture ?
+                            {false ?
                                 <img src={user.picture} alt="Profile" className="profile-picture" /> :
                                 <div className="profile-initial">{user.username.charAt(0).toUpperCase()}</div>
                             }
@@ -221,27 +263,48 @@ const HomePage2 = ({user}) => {
                         <button className="btn btn-light me-2" onClick={toggleSidebar}><FaBars /></button>
                         <input type="text" className="form-control" placeholder="Search" value={searchTerm} onChange={handleInputChange} />
                     </form>
+                    <div className='folder-buttons'>
+                        <button onClick={handleUsersClick} className={`folder-button ${selectedList === 'users' ? 'selected' : ''}`}>
+                            Users
+                        </button>
+                        <button onClick={handleGroupsClick} className={`folder-button ${selectedList === 'groups' ? 'selected' : ''}`}>
+                            Groups
+                        </button>
+                    </div>
                     <div className="chat-list">
-                        {chats.map(chat => (
-                            <div className={`chat-list-item ${selectedChat && chat.id === selectedChat.id ? 'selected' : ''}`} 
+                        {selectedList === 'users' ?
+                            chats.map(chat => (
+                                <div className={`chat-list-item ${selectedChat && chat.id === selectedChat.id ? 'selected' : ''}`} 
                                         key={chat.id} onClick={() => handleSelectChat(chat)}>
-                                <div className="initial-letter">
-                                    {chat.username.charAt(0).toUpperCase()}
+                                    
+                                    <div className="initial-letter">
+                                        {chat.username.charAt(0).toUpperCase()}
+                                    </div>
+                                    {chat.username}
+                                    {/* {notifications.map(notification => {
+                                        if (notification.senderId === chat.userId && notification.unreadMessageCount > 0) {
+                                            // Show a small rounded notification with unreadMessageCount
+                                            return (
+                                                <div key={`notification-${chat.userId}`} className="notification-badge">
+                                                    {notification.unreadMessageCount}
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })} */}
                                 </div>
-                                {chat.username}
-                                {/* {notifications.map(notification => {
-                                    if (notification.senderId === chat.userId && notification.unreadMessageCount > 0) {
-                                        // Show a small rounded notification with unreadMessageCount
-                                        return (
-                                            <div key={`notification-${chat.userId}`} className="notification-badge">
-                                                {notification.unreadMessageCount}
-                                            </div>
-                                        );
-                                    }
-                                    return null;
-                                })} */}
-                            </div>
-                        ))}
+                            )) :
+                            groups.map(group => (
+                                <div className={`chat-list-item ${selectedChat && group.id === selectedChat.id ? 'selected' : ''}`} 
+                                        key={group.id} onClick={() => handleSelectChat(group)}>
+
+                                    <div className="initial-letter">
+                                        {group.groupName.charAt(0).toUpperCase()}
+                                    </div>
+                                    {group.groupName}
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
 
@@ -254,12 +317,12 @@ const HomePage2 = ({user}) => {
                     </div>
                     <div className="chat-conversation" ref={chatContainerRef}>
                         {messages.map((message, index) => (
-                            <div key={index} className={`message ${message.recipientId === selectedChat.id ? 'mine' : ''}`}>
+                            <div key={index} className={`message ${message.senderId === user.id ? 'mine' : ''}`}>
                                 {/* Message recipient id - {message.recipientId},
                                 selected chat id - {selectedChat.id},
                                 Message - {JSON.stringify(message)},
                                 Selected Chat - {JSON.stringify(selectedChat)} */}
-                                {message.messageText}
+                                { message.messageText }
                             </div>
                         ))}
                     </div>

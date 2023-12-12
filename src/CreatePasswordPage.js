@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom'; // Import if you need to navigate after submission
 import './CreatePassword.css';
 
-const CreatePasswordPage = ({onPasswordComplete}) => {
+const CreatePasswordPage = ({setPasswordReady, setUser}) => {
     const location = useLocation(); // Use the useLocation hook
     const { username } = location.state || {};
     const [password, setPassword] = useState('');
@@ -14,25 +14,22 @@ const CreatePasswordPage = ({onPasswordComplete}) => {
     };
 
     const handleSubmitPassword = async () => {
-        console.log(username);
         try {
-            const response = await fetch(`http://localhost:5000/messenger/authentication/register/username/${username}/setPassword`, {
+            const response = await fetch(`http://localhost:5000/messenger/authentication/register/setPassword`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ password }) // Sending the password as an object
+                body: JSON.stringify({ username, code: password }), // Sending the password as an object
+                credentials: 'include'
             });
 
             if (response.ok) {
                 // Set Password Complete 'true'
-                onPasswordComplete();
+                setPasswordReady(true);
                 
                 const user = await response.json(); // Assuming the response is the user object
-                
-                // Save the user object to localStorage
-                localStorage.setItem('user', JSON.stringify(user));
-                
+                setUser(user);
                 // Handle successful password set, e.g., navigate to a login page or a success page
                 navigate('/homepage'); // Update this to your desired route
             } else {

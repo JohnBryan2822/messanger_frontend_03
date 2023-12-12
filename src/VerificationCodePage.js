@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './VerificationPage.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const VerificationCodePage = ({ onVerificationSuccess }) => {
+const VerificationCodePage = ({ setIsVerified }) => {
     const location = useLocation(); // Use the useLocation hook
-    const { username, email } = location.state || {}; // Extract username and email from the location state
+    const { username, email } = location.state || {};
     const [formData] = useState({ username, email });
     const [code, setCode] = useState('');
     const [timer, setTimer] = useState(60);
@@ -31,7 +31,7 @@ const VerificationCodePage = ({ onVerificationSuccess }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ code: code }) // Assuming the backend expects an object with the verification code
+                body: JSON.stringify({ username, code }) // Assuming the backend expects an object with the verification code
             });
 
             if (!response.ok) {
@@ -40,8 +40,8 @@ const VerificationCodePage = ({ onVerificationSuccess }) => {
 
             setTimeout(() => {
                 alert("Verification successful!");
-                onVerificationSuccess();
-                navigate('/create-password', { state: { username: formData.username } }); // Navigate to password creation page
+                setIsVerified(true);
+                navigate('/create-password', { state: { username: username } }); // Navigate to password creation page
             }, 1000);
         } catch (error) {
             setVerificationError(error.message || 'An error occurred during verification.');
